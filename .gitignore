@@ -1,0 +1,19 @@
+# Secrets
+.env
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Local data / logs
+audit_log.db
+*.sqlite
+*.sqlite3
+
+# OS
+.DS_Store
