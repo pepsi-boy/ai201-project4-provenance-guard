@@ -152,14 +152,16 @@ input flips at a bare 0.5 boundary.
 
 ### Two example submissions with noticeably different confidence
 
-Both are **live `/submit` responses** (offline heuristic mode; a real Groq key sharpens them further):
+Both are **live `/submit` responses with the Groq LLM signal active** (`llm_available: true`). The
+LLM is non-deterministic, so exact values drift by ~0.05–0.1 between runs; the *gap* is the point.
 
 **High-confidence case** — casual first-person human writing:
 > *"ok so i finally tried that new ramen place downtown and honestly? underwhelming. the broth
 > was fine but they put WAY too much sodium in it…"*
 
 ```json
-{ "attribution": "likely_human", "ai_probability": 0.117, "confidence": 0.837 }
+{ "attribution": "likely_human", "ai_probability": 0.158, "confidence": 0.762,
+  "llm_score": 0.2, "stylometric_score": 0.08 }
 ```
 
 **Lower-confidence case** — formal, uniform prose from a (stated) non-native academic writer:
@@ -167,11 +169,15 @@ Both are **live `/submit` responses** (offline heuristic mode; a real Groq key s
 > studied in the literature. Central banks face a fundamental tension…"*
 
 ```json
-{ "attribution": "uncertain", "ai_probability": 0.508, "confidence": 0.40 }
+{ "attribution": "uncertain", "ai_probability": 0.638, "confidence": 0.494,
+  "llm_score": 0.7, "stylometric_score": 0.522 }
 ```
 
-The confidence gap (0.84 vs 0.40) is the point: the system is loud when it's sure and openly
+The confidence gap (0.76 vs 0.49) is the point: the system is loud when it's sure and openly
 hesitant on exactly the kind of formal human writing that would otherwise be a false positive.
+Note the second case is the false-positive guard working end-to-end — the **LLM alone wanted to
+call it AI (0.7)**, but the high 0.70 AI-band threshold plus a milder stylometric vote (0.52)
+held the verdict at `uncertain` instead of accusing the writer.
 
 ---
 
@@ -221,7 +227,7 @@ curl -s -X POST http://localhost:5001/appeal -H "Content-Type: application/json"
   "content_id": "f45c6774-a1fb-492c-b9fb-513e1bcd2d08",
   "status": "under_review",
   "original_attribution": "likely_ai",
-  "original_confidence": 0.707,
+  "original_confidence": 0.604,
   "creator_reasoning": "I wrote this for a graduate seminar. English is my second language..."
 }
 ```
@@ -265,24 +271,24 @@ included in the live endpoint):
 ```json
 { "entries": [
   { "id": 4, "event_type": "appeal", "content_id": "f45c6774-…", "creator_id": "acct-9931",
-    "attribution": "likely_ai", "confidence": 0.707, "ai_probability": 0.875,
-    "llm_score": 1.0, "stylometric_score": 0.643, "status": "under_review",
+    "attribution": "likely_ai", "confidence": 0.604, "ai_probability": 0.734,
+    "llm_score": 0.8, "stylometric_score": 0.61, "status": "under_review",
     "detail": { "appeal_reasoning": "I wrote this for a graduate seminar. English is my second language…" },
     "timestamp": "2026-07-01T06:02:49.922Z" },
 
   { "id": 3, "event_type": "classification", "content_id": "63be38b9-…", "creator_id": "prof-lee",
-    "attribution": "uncertain", "confidence": 0.40, "ai_probability": 0.508,
-    "llm_score": 0.5, "stylometric_score": 0.522, "status": "classified",
+    "attribution": "uncertain", "confidence": 0.494, "ai_probability": 0.638,
+    "llm_score": 0.7, "stylometric_score": 0.522, "status": "classified",
     "timestamp": "2026-07-01T06:02:49.894Z" },
 
   { "id": 2, "event_type": "classification", "content_id": "f45c6774-…", "creator_id": "acct-9931",
-    "attribution": "likely_ai", "confidence": 0.707, "ai_probability": 0.875,
-    "llm_score": 1.0, "stylometric_score": 0.643, "status": "classified",
+    "attribution": "likely_ai", "confidence": 0.604, "ai_probability": 0.734,
+    "llm_score": 0.8, "stylometric_score": 0.61, "status": "classified",
     "timestamp": "2026-07-01T06:02:49.880Z" },
 
   { "id": 1, "event_type": "classification", "content_id": "d4527041-…", "creator_id": "maya",
-    "attribution": "likely_human", "confidence": 0.837, "ai_probability": 0.117,
-    "llm_score": 0.136, "stylometric_score": 0.08, "status": "classified",
+    "attribution": "likely_human", "confidence": 0.762, "ai_probability": 0.158,
+    "llm_score": 0.2, "stylometric_score": 0.08, "status": "classified",
     "timestamp": "2026-07-01T06:02:49.846Z" }
 ] }
 ```
