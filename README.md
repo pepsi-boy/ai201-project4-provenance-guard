@@ -360,3 +360,5 @@ storage.py        SQLite: submissions (state) + audit_log (append-only events)
 test_scoring.py   Calibration harness for the four spec inputs
 planning.md       Design spec, architecture diagram, AI tool plan
 ```
+
+## Video Walkthrough(Demo): https://drive.google.com/file/d/1z6kI-oVDJs9DI6gbK0RDFBsOl3SOxRRN/view?usp=sharing
